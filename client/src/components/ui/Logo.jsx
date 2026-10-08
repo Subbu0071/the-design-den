@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import logo from "../../assets/brand/logo-monogram-gold.png";
+import logo from "../../assets/brand/logo-monogram-gold.webp";
 
 function Logo({ className = "", imageClassName = "" }) {
   return (

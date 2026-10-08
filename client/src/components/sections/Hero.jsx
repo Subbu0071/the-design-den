@@ -5,7 +5,7 @@ import Container from "../ui/Container";
 import Eyebrow from "../ui/Eyebrow";
 import Section from "../ui/Section";
 
-import heroImage from "../../assets/images/hero-living-room.png";
+import heroImage from "../../assets/images/hero-living-room.webp";
 
 function Hero() {
   return (

@@ -1,4 +1,4 @@
-import projectImage from "../assets/images/hero-living-room.png";
+import projectImage from "../assets/images/hero-living-room.webp";
 
 const projects = [
   {
