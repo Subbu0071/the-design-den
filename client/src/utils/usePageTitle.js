@@ -42,7 +42,7 @@ function setCanonical(url) {
 }
 
 function usePageTitle(title, options = {}) {
-  const { description = DEFAULT_DESCRIPTION, image = "/og-image.jpg" } =
+  const { description = DEFAULT_DESCRIPTION, image = "/og-image.png" } =
     options;
 
   useEffect(() => {
