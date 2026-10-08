@@ -8,7 +8,10 @@ import ProjectCard from "../components/ui/ProjectCard";
 import projects from "../data/projects";
 
 function Projects() {
-  usePageTitle("DESIGN DEN — Projects");
+  usePageTitle("Projects — DESIGN DEN", {
+    description:
+      "Explore DESIGN DEN interior concepts across modular kitchens, wardrobes, and complete home interiors.",
+  });
 
   return (
     <>

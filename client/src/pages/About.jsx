@@ -7,7 +7,10 @@ import Section from "../components/ui/Section";
 import { aboutServices } from "../data/about";
 
 function About() {
-  usePageTitle("DESIGN DEN — About");
+ usePageTitle("About DESIGN DEN", {
+   description:
+     "Learn about DESIGN DEN, our factory-direct approach, quality control process, and interior design philosophy.",
+ });
 
   return (
     <>

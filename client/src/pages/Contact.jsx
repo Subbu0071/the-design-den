@@ -1,4 +1,5 @@
 import { useSearchParams } from "react-router-dom";
+import usePageTitle from "../utils/usePageTitle";
 import siteConfig from "../config/site";
 import services from "../data/services";
 import Button from "../components/ui/Button";
@@ -11,6 +12,11 @@ const serviceLabels = Object.fromEntries(
 );
 
 function Contact() {
+    usePageTitle("Contact DESIGN DEN — Request a Consultation", {
+      description:
+        "Start a conversation with DESIGN DEN about your modular kitchen, wardrobe, full home interior, furniture, or selected commercial interior project.",
+    });
+    
   const [searchParams] = useSearchParams();
 
   const selectedService = searchParams.get("service");

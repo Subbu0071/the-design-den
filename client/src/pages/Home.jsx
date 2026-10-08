@@ -8,7 +8,10 @@ import QualitySection from "../components/sections/QualitySection";
 import ConsultationCTA from "../components/sections/ConsultationCTA";
 
 function Home() {
-  usePageTitle("DESIGN DEN — Home");
+  usePageTitle("DESIGN DEN — Spaces designed around how you live.", {
+    description:
+      "Thoughtful interiors with factory-direct execution, premium materials, and quality control at every stage.",
+  });
 
   return (
     <>

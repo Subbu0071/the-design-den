@@ -9,7 +9,10 @@ import ServiceDetail from "../components/sections/ServiceDetail";
 import services from "../data/services";
 
 function Services() {
-  usePageTitle("DESIGN DEN — Services");
+  usePageTitle("Interior Design Services — DESIGN DEN", {
+    description:
+      "Explore DESIGN DEN services including modular kitchens, wardrobes, full home interiors, loose furniture, and selected commercial interiors.",
+  });
 
   return (
     <>

@@ -18,6 +18,11 @@ function ProjectDetail() {
     project
       ? `DESIGN DEN — ${project.title}`
       : "DESIGN DEN — Project Not Found",
+    {
+      description: project
+        ? `${project.title} — an AI-generated interior concept presented by DESIGN DEN.`
+        : "The project you're looking for could not be found on the DESIGN DEN website.",
+    },
   );
 
   if (!project) {
@@ -84,7 +89,7 @@ function ProjectDetail() {
           <div className="overflow-hidden bg-[var(--color-charcoal)]">
             <img
               src={project.image}
-              alt={`${project.title} interior concept`}
+              alt={`${project.title} — AI-generated interior concept`}
               className="aspect-[16/9] h-full w-full object-cover"
             />
           </div>

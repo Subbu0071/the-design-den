@@ -2,7 +2,10 @@ import { Link } from "react-router-dom";
 import usePageTitle from "../utils/usePageTitle";
 
 function NotFound() {
-    usePageTitle("DESIGN DEN — Page Not Found");
+    usePageTitle("Page Not Found — DESIGN DEN", {
+      description:
+        "The page you're looking for could not be found on the DESIGN DEN website.",
+    });
   return (
     <section className="flex min-h-[70vh] items-center justify-center bg-[var(--color-ivory)] px-5 py-20 sm:px-8">
       <div className="max-w-2xl text-center">

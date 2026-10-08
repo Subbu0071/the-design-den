@@ -66,7 +66,10 @@ const qualityChecks = [
 ];
 
 function Process() {
-  usePageTitle("DESIGN DEN — Process");
+  usePageTitle("Our Process — DESIGN DEN", {
+    description:
+      "Discover the DESIGN DEN interior process from consultation and design through manufacturing, quality control, installation, and handover.",
+  });
 
   return (
     <>
