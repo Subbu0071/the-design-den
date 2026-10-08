@@ -11,11 +11,11 @@ function ServiceDetail({ service, index }) {
   return (
     <Section
       id={service.id}
-      className={
+      className={`scroll-mt-24 ${
         isDark
           ? "bg-[var(--color-charcoal)] text-[var(--color-ivory)]"
           : "bg-[var(--color-ivory)]"
-      }
+      }`}
     >
       <Container>
         <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">

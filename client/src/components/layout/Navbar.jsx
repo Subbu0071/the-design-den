@@ -1,113 +1,110 @@
-import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
+import { useState } from "react";
+import Logo from "../ui/Logo";
 
-import logo from "../../assets/brand/logo.png";
-
-const navLinks = [
-  { label: "Projects", path: "/projects" },
-  { label: "Services", path: "/services" },
-  { label: "About", path: "/about" },
-  { label: "Process", path: "/process" },
-  { label: "Contact", path: "/contact" },
+const navItems = [
+  { label: "Projects", to: "/projects" },
+  { label: "Services", to: "/services" },
+  { label: "Process", to: "/process" },
+  { label: "About", to: "/about" },
 ];
 
 function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const closeMenu = () => {
-    setIsOpen(false);
+    setIsMenuOpen(false);
   };
 
-  const navLinkClass = ({ isActive }) =>
-    `text-xs font-medium uppercase tracking-[0.14em] transition-colors duration-300 ${
-      isActive
-        ? "text-[var(--color-gold)]"
-        : "text-[var(--color-ink)] hover:text-[var(--color-gold)]"
-    }`;
-
   return (
-    <header className="sticky top-0 z-50 border-b border-black/10 bg-[var(--color-ivory)]/95 backdrop-blur-md">
-      <nav
-        className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10"
-        aria-label="Main navigation"
-      >
+    <header className="sticky top-0 z-50 border-b border-[var(--color-sand)]/40 bg-[var(--color-ivory)]/95 backdrop-blur">
+      <div className="mx-auto flex min-h-20 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
         {/* Logo */}
-        <NavLink
-          to="/"
-          className="flex items-center"
-          aria-label="DESIGN DEN home"
-          onClick={closeMenu}
-        >
-          <img
-            src={logo}
-            alt="DESIGN DEN — Factory Direct | 3 Layer QC"
-            className="h-14 w-auto object-contain"
-          />
-        </NavLink>
+        <Logo />
 
         {/* Desktop Navigation */}
-        <div className="hidden items-center gap-7 lg:flex">
-          {navLinks.map((link) => (
-            <NavLink key={link.path} to={link.path} className={navLinkClass}>
-              {link.label}
+        <nav
+          aria-label="Primary navigation"
+          className="hidden items-center gap-8 md:flex"
+        >
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `relative py-3 text-xs font-semibold uppercase tracking-[0.14em] transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-dark-gold)] focus-visible:ring-offset-4 ${
+                  isActive
+                    ? "text-[var(--color-ink)] after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:bg-[var(--color-dark-gold)]"
+                    : "text-[var(--color-warm-grey)] hover:text-[var(--color-ink)]"
+                }`
+              }
+            >
+              {item.label}
             </NavLink>
           ))}
 
-          <NavLink
+          <Link
             to="/contact"
-            className="bg-[var(--color-gold)] px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink)] transition-colors duration-300 hover:bg-[var(--color-dark-gold)]"
+            className="inline-flex min-h-11 items-center justify-center bg-[var(--color-ink)] px-5 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ivory)] transition-colors duration-200 hover:bg-[var(--color-charcoal)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-dark-gold)] focus-visible:ring-offset-4"
           >
             Get a Consultation
-          </NavLink>
-        </div>
+          </Link>
+        </nav>
 
         {/* Mobile Menu Button */}
         <button
           type="button"
-          onClick={() => setIsOpen((prev) => !prev)}
-          className="flex h-11 w-11 items-center justify-center text-[var(--color-ink)] lg:hidden"
-          aria-label={isOpen ? "Close menu" : "Open menu"}
-          aria-expanded={isOpen}
+          aria-label={
+            isMenuOpen ? "Close navigation menu" : "Open navigation menu"
+          }
+          aria-expanded={isMenuOpen}
           aria-controls="mobile-navigation"
+          onClick={() => setIsMenuOpen((open) => !open)}
+          className="inline-flex min-h-11 min-w-11 items-center justify-center text-[var(--color-ink)] transition-colors hover:text-[var(--color-dark-gold)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-dark-gold)] focus-visible:ring-offset-4 md:hidden"
         >
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMenuOpen ? (
+            <X aria-hidden="true" className="h-6 w-6" />
+          ) : (
+            <Menu aria-hidden="true" className="h-6 w-6" />
+          )}
         </button>
-      </nav>
+      </div>
 
       {/* Mobile Navigation */}
-      {isOpen && (
-        <div
+      {isMenuOpen && (
+        <nav
           id="mobile-navigation"
-          className="border-t border-black/10 bg-[var(--color-ivory)] lg:hidden"
+          aria-label="Mobile navigation"
+          className="border-t border-[var(--color-sand)]/40 bg-[var(--color-ivory)] px-5 py-5 md:hidden"
         >
-          <div className="mx-auto flex max-w-7xl flex-col px-5 py-5 sm:px-8">
-            {navLinks.map((link) => (
+          <div className="flex flex-col">
+            {navItems.map((item) => (
               <NavLink
-                key={link.path}
-                to={link.path}
+                key={item.to}
+                to={item.to}
                 onClick={closeMenu}
                 className={({ isActive }) =>
-                  `border-b border-black/10 py-4 text-sm font-medium uppercase tracking-[0.14em] transition-colors ${
+                  `border-b border-[var(--color-sand)]/40 py-4 text-sm font-semibold uppercase tracking-[0.12em] transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-dark-gold)] ${
                     isActive
-                      ? "text-[var(--color-gold)]"
-                      : "text-[var(--color-ink)]"
+                      ? "text-[var(--color-ink)]"
+                      : "text-[var(--color-warm-grey)] hover:text-[var(--color-ink)]"
                   }`
                 }
               >
-                {link.label}
+                {item.label}
               </NavLink>
             ))}
 
-            <NavLink
+            <Link
               to="/contact"
               onClick={closeMenu}
-              className="mt-5 bg-[var(--color-gold)] px-5 py-4 text-center text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-ink)]"
+              className="mt-5 inline-flex min-h-12 items-center justify-center bg-[var(--color-ink)] px-5 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-ivory)] transition-colors duration-200 hover:bg-[var(--color-charcoal)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-dark-gold)] focus-visible:ring-offset-2"
             >
               Get a Consultation
-            </NavLink>
+            </Link>
           </div>
-        </div>
+        </nav>
       )}
     </header>
   );

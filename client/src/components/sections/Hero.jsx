@@ -47,7 +47,7 @@ function Hero() {
             <div className="aspect-[4/5] overflow-hidden bg-[var(--color-charcoal)]">
               <img
                 src={heroImage}
-                alt="AI-generated contemporary interior concept for demonstration"
+                alt="living room"
                 className="h-full w-full object-cover"
               />
             </div>

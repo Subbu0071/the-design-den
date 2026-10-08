@@ -14,7 +14,7 @@ function MainLayout() {
 
       <Navbar />
 
-      <main id="main-content">
+      <main id="main-content" tabIndex="-1" className="focus:outline-none">
         <Outlet />
       </main>
 
