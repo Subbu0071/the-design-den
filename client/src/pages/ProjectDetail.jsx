@@ -104,11 +104,7 @@ function ProjectDetail() {
                 {project.description}
               </p>
 
-              <p className="mt-6 max-w-3xl text-sm leading-7 text-[var(--color-warm-grey)]">
-                This page currently uses an AI-generated concept visual for
-                website demonstration. It will be replaced with actual DESIGN
-                DEN project photography and project information.
-              </p>
+              
             </div>
           </div>
         </Container>
