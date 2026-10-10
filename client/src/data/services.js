@@ -60,6 +60,49 @@ const services = [
       "Hospitality Spaces",
     ],
   },
+  {
+    id: "false-ceiling-electrical",
+    title: "False Ceiling & Electrical",
+    shortDescription:
+      "Ceiling and electrical work considered as part of a coordinated interior plan.",
+    description:
+      "DESIGN DEN can include false ceiling and electrical requirements in the planning of your interior project, helping coordinate these elements with the overall space design.",
+    options: ["False Ceiling", "Electrical Work"],
+  },
+  {
+    id: "plumbing-tiling",
+    title: "Plumbing & Tiling",
+    shortDescription:
+      "Plumbing and tile work planned around your interior requirements.",
+    description:
+      "Plumbing and tiling requirements can be considered alongside your interior project to help coordinate practical installations with the surrounding finishes.",
+    options: ["Plumbing", "Tile Installation"],
+  },
+  {
+    id: "painting-wallpaper",
+    title: "Painting & Wallpaper",
+    shortDescription:
+      "Wall finishes that complement the colours, materials, and character of your interior.",
+    description:
+      "Explore painting and wallpaper options to complete your interior scheme, with wall finishes selected to complement the overall design direction.",
+    options: ["Wall Painting", "Wallpaper"],
+  },
+  {
+    id: "appliances-utility",
+    title: "Appliances & Utility Fittings",
+    shortDescription:
+      "Kitchen appliances and utility fittings considered as part of your interior planning.",
+    description:
+      "DESIGN DEN can account for specified appliances and utility fittings when planning your interior requirements, helping consider their placement alongside cabinetry and available space.",
+    options: [
+      "Microwave",
+      "Hob",
+      "OTG",
+      "Dishwasher",
+      "Washing Machine",
+      "Iron Racks",
+    ],
+  },
 ];
 
 export default services;

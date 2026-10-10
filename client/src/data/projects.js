@@ -7,6 +7,21 @@ import statementWardrobe from "../assets/images/projects/statement-wardrobe.jpeg
 import warmGeometryKitchen from "../assets/images/projects/warm-geometry-kitchen.jpeg";
 import woodenTvUnit from "../assets/images/projects/wooden-tv-unit.jpeg";
 
+// Additional optimized project photographs
+import compactVanity01 from "../assets/images/projects/compact-vanity-01.webp";
+import compactVanity03 from "../assets/images/projects/compact-vanity-03.webp";
+
+import contemporaryLounge01 from "../assets/images/projects/contemporary-lounge-01.webp";
+import contemporaryLounge02 from "../assets/images/projects/contemporary-lounge-02.webp";
+
+import panelledLivingRoom01 from "../assets/images/projects/panelled-living-room-01.webp";
+import panelledLivingRoom02 from "../assets/images/projects/panelled-living-room-02.webp";
+
+import statementWardrobe01 from "../assets/images/projects/statement-wardrobe-01.webp";
+
+import woodenTvUnit01 from "../assets/images/projects/wooden-tv-unit-01.webp";
+import woodenTvUnit02 from "../assets/images/projects/wooden-tv-unit-02.webp";
+
 const projects = [
   {
     id: "contemporary-lounge",
@@ -17,6 +32,7 @@ const projects = [
     description:
       "A welcoming lounge combining patterned accent seating, warm wood finishes, a compact coffee table, and a coordinated entertainment wall. The layered textures create a comfortable living space with distinct character.",
     image: contemporaryLounge,
+    gallery: [contemporaryLounge01, contemporaryLounge02],
     status: "Project Photography",
   },
   {
@@ -28,6 +44,7 @@ const projects = [
     description:
       "A living room defined by decorative wall panelling, a contrasting media unit, and deep wood flooring. Upholstered seating adds softness, while the clean-lined entertainment wall gives the room a structured focal point.",
     image: panelledLivingRoom,
+    gallery: [panelledLivingRoom01, panelledLivingRoom02],
     status: "Project Photography",
   },
   {
@@ -39,6 +56,7 @@ const projects = [
     description:
       "A statement entertainment unit combining natural wood-grain surfaces, open display shelving, and contrasting dark drawers. The arrangement balances display space with concealed storage around the television.",
     image: woodenTvUnit,
+    gallery: [woodenTvUnit01, woodenTvUnit02],
     status: "Project Photography",
   },
   {
@@ -50,6 +68,7 @@ const projects = [
     description:
       "A compact vanity arrangement featuring wood-finish cabinetry, dark countertops, a vessel basin, and a mirrored storage cabinet. Teal wall tiles introduce a strong accent against the lighter surrounding surfaces.",
     image: compactVanity,
+    gallery: [compactVanity01, compactVanity03],
     status: "Project Photography",
   },
   {
@@ -61,6 +80,7 @@ const projects = [
     description:
       "A full-height wardrobe combines mustard-toned panels, textured central finishes, and glazed sections that reveal internal shelving. Coordinated wood tones and the upholstered headboard bring warmth to the bedroom.",
     image: statementWardrobe,
+    gallery: [statementWardrobe01],
     status: "Project Photography",
   },
   {

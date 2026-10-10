@@ -53,8 +53,11 @@ function ProjectDetail() {
     );
   }
 
+  const gallery = project.gallery ?? [];
+
   return (
     <>
+      {/* Project introduction */}
       <Section className="bg-[var(--color-ivory)] pb-10 sm:pb-14 lg:pb-16">
         <Container>
           <Link
@@ -87,13 +90,14 @@ function ProjectDetail() {
         </Container>
       </Section>
 
+      {/* Main image and additional gallery */}
       <Section className="bg-[var(--color-ivory)] pt-0 pb-12 sm:pb-16 lg:pb-20">
         <Container>
           <figure>
             <div className="overflow-hidden bg-[var(--color-charcoal)]">
               <img
                 src={project.image}
-                alt={`${project.title} — interior design details`}
+                alt={`${project.title} — main interior view`}
                 fetchPriority="high"
                 decoding="async"
                 className="h-auto max-h-[780px] w-full object-cover"
@@ -106,6 +110,52 @@ function ProjectDetail() {
             </figcaption>
           </figure>
 
+          {gallery.length > 0 && (
+            <section
+              aria-label={`${project.title} photo gallery`}
+              className="mt-10 sm:mt-14 lg:mt-16"
+            >
+              <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <Eyebrow>More Views</Eyebrow>
+
+                  <h2 className="mt-3 font-display text-3xl text-[var(--color-ink)] sm:text-4xl">
+                    Details &amp; Perspectives
+                  </h2>
+                </div>
+
+                <p className="text-xs uppercase tracking-[0.12em] text-[var(--color-warm-grey)]">
+                  {gallery.length} additional{" "}
+                  {gallery.length === 1 ? "view" : "views"}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6">
+                {gallery.map((image, index) => (
+                  <figure
+                    key={image}
+                    className="group overflow-hidden bg-[var(--color-sand)]"
+                  >
+                    <div className="overflow-hidden">
+                      <img
+                        src={image}
+                        alt={`${project.title} — additional view ${index + 1}`}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-auto w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.02]"
+                      />
+                    </div>
+
+                    <figcaption className="border-b border-[var(--color-sand)] py-3 text-xs uppercase tracking-[0.12em] text-[var(--color-warm-grey)]">
+                      View {String(index + 2).padStart(2, "0")}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Project overview */}
           <div className="mt-12 grid gap-6 sm:mt-16 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
             <div>
               <Eyebrow>Project Overview</Eyebrow>
@@ -135,6 +185,7 @@ function ProjectDetail() {
         </Container>
       </Section>
 
+      {/* Consultation CTA */}
       <Section className="bg-[var(--color-charcoal)]">
         <Container>
           <div className="mx-auto max-w-3xl py-4 text-center">
