@@ -23,13 +23,6 @@ const labelClass = "block text-sm font-medium text-[var(--color-charcoal)]";
 const checkboxClass =
   "mt-1 h-4 w-4 shrink-0 accent-[var(--color-dark-gold)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-dark-gold)]";
 
-const optionalServiceIds = [
-  "false-ceiling-electrical",
-  "plumbing-tiling",
-  "painting-wallpaper",
-  "appliances-utility",
-];
-
 const initialOptionalDetails = {
   contactMethod: "either",
   homeSize: "",
@@ -46,7 +39,15 @@ function Contact() {
   });
 
   const [searchParams] = useSearchParams();
+
+  // Support both the original single-service URL and the new multi-service URL.
   const requestedService = searchParams.get("service");
+
+  const requestedServiceIds = [
+    ...new Set(
+      [...searchParams.getAll("services"), requestedService].filter(Boolean),
+    ),
+  ].filter((id) => serviceOptions.some((service) => service.id === id));
 
   const validRequestedService = serviceOptions.some(
     (service) => service.id === requestedService,
@@ -54,9 +55,31 @@ function Contact() {
     ? requestedService
     : "";
 
+  const readRequestedOptions = () => {
+    const result = {};
+
+    requestedServiceIds.forEach((serviceId) => {
+      const service = services.find((item) => item.id === serviceId);
+      if (!service) return;
+
+      const validOptions = searchParams
+        .getAll(`option[${serviceId}]`)
+        .filter((option) =>
+          service.options.some((item) => item.name === option),
+        );
+
+      if (validOptions.length > 0) {
+        result[serviceId] = [...new Set(validOptions)];
+      }
+    });
+
+    return result;
+  };
+
   const [selectedServices, setSelectedServices] = useState(() =>
-    validRequestedService ? [validRequestedService] : [],
+    requestedServiceIds.length > 0 ? requestedServiceIds : [],
   );
+  const [selectedOptions, setSelectedOptions] = useState(readRequestedOptions);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
@@ -69,18 +92,16 @@ function Contact() {
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
 
   useEffect(() => {
-    if (!validRequestedService) return;
+    if (requestedServiceIds.length === 0) return;
 
-    setSelectedServices((current) => {
-      if (current.includes(validRequestedService)) return current;
-      return [validRequestedService];
-    });
-  }, [validRequestedService]);
+    setSelectedServices(requestedServiceIds);
+    setSelectedOptions(readRequestedOptions());
+    // URL changes should update the prefilled services and options.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const hasFullHomeService = selectedServices.includes("full-home-interiors");
-  const hasCommercialService = selectedServices.includes(
-    "commercial-interiors",
-  );
+  const hasCommercialService = selectedServices.includes("commercial-interiors");
 
   const normalizedPhone = phone.replace(/[\s()-]/g, "").replace(/^\+91/, "");
   const isPhoneValid = /^[6-9]\d{9}$/.test(normalizedPhone);
@@ -115,6 +136,28 @@ function Contact() {
 
       return withoutNotSure.filter((id) => id !== serviceId);
     });
+
+    if (!checked) {
+      setSelectedOptions((current) => {
+        const next = { ...current };
+        delete next[serviceId];
+        return next;
+      });
+    }
+  }
+
+  function handleOptionChange(serviceId, option, checked) {
+    setSelectedOptions((current) => {
+      const currentOptions = current[serviceId] ?? [];
+      const nextOptions = checked
+        ? [...new Set([...currentOptions, option])]
+        : currentOptions.filter((item) => item !== option);
+
+      return {
+        ...current,
+        [serviceId]: nextOptions,
+      };
+    });
   }
 
   function handleOptionalChange(event) {
@@ -141,6 +184,10 @@ function Contact() {
   }
 
   const { brand, contact, locations } = siteConfig;
+
+  const selectedServiceDetails = selectedServices
+    .map((id) => services.find((service) => service.id === id))
+    .filter(Boolean);
 
   return (
     <>
@@ -243,18 +290,26 @@ function Contact() {
                 details if you&apos;d like.
               </p>
 
-              {validRequestedService && (
-                <div className="mt-6 border-l-2 border-[var(--color-gold)] bg-[var(--color-ivory)] px-4 py-3">
+              {selectedServiceDetails.length > 0 && (
+                <div className="mt-6 border-l-2 border-[var(--color-gold)] bg-[var(--color-ivory)] px-4 py-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-warm-grey)]">
-                    Service selected from your previous page
+                    Your selection from the Services page
                   </p>
-                  <p className="mt-1 text-sm font-medium text-[var(--color-ink)]">
-                    {
-                      serviceOptions.find(
-                        (service) => service.id === validRequestedService,
-                      )?.title
-                    }
-                  </p>
+
+                  <div className="mt-3 space-y-3">
+                    {selectedServiceDetails.map((service) => (
+                      <div key={service.id}>
+                        <p className="text-sm font-semibold text-[var(--color-ink)]">
+                          {service.title}
+                        </p>
+                        <p className="mt-1 text-sm leading-6 text-[var(--color-warm-grey)]">
+                          {selectedOptions[service.id]?.length
+                            ? selectedOptions[service.id].join(", ")
+                            : "No specific options selected"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
@@ -383,7 +438,11 @@ function Contact() {
                     {serviceOptions.map((service) => (
                       <label
                         key={service.id}
-                        className="flex min-h-12 items-start gap-3 border border-[var(--color-sand)] p-3 text-sm leading-6 transition-colors hover:border-[var(--color-dark-gold)]"
+                        className={`flex min-h-12 items-start gap-3 border p-3 text-sm leading-6 transition-colors hover:border-[var(--color-dark-gold)] ${
+                          selectedServices.includes(service.id)
+                            ? "border-[var(--color-dark-gold)] bg-[var(--color-ivory)]"
+                            : "border-[var(--color-sand)]"
+                        }`}
                       >
                         <input
                           type="checkbox"
@@ -402,7 +461,13 @@ function Contact() {
                       </label>
                     ))}
 
-                    <label className="flex min-h-12 items-start gap-3 border border-[var(--color-sand)] p-3 text-sm leading-6 transition-colors hover:border-[var(--color-dark-gold)]">
+                    <label
+                      className={`flex min-h-12 items-start gap-3 border p-3 text-sm leading-6 transition-colors hover:border-[var(--color-dark-gold)] ${
+                        selectedServices.includes("not-sure")
+                          ? "border-[var(--color-dark-gold)] bg-[var(--color-ivory)]"
+                          : "border-[var(--color-sand)]"
+                      }`}
+                    >
                       <input
                         type="checkbox"
                         name="services"
@@ -421,6 +486,67 @@ function Contact() {
                     <p className="text-sm text-red-800">{errors.services}</p>
                   )}
                 </fieldset>
+
+                {selectedServiceDetails.length > 0 && (
+                  <div className="space-y-5">
+                    <div>
+                      <h3 className="text-base font-semibold text-[var(--color-charcoal)]">
+                        Review your service options
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-[var(--color-warm-grey)]">
+                        Change your choices below, or leave every option
+                        unchecked if you would like advice during the
+                        consultation.
+                      </p>
+                    </div>
+
+                    {selectedServiceDetails.map((service) => (
+                      <fieldset
+                        key={service.id}
+                        className="border border-[var(--color-sand)] p-4"
+                      >
+                        <legend className="px-1 text-sm font-semibold text-[var(--color-charcoal)]">
+                          {service.title}
+                        </legend>
+
+                        <div className="mt-2 grid gap-3 sm:grid-cols-2">
+                          {service.options.map((option) => {
+                            const optionName = option.name;
+                            const isChecked = (
+                              selectedOptions[service.id] ?? []
+                            ).includes(optionName);
+
+                            return (
+                              <label
+                                key={optionName}
+                                className={`flex items-start gap-3 border p-3 text-sm leading-6 text-[var(--color-charcoal)] transition-colors hover:border-[var(--color-dark-gold)] ${
+                                  isChecked
+                                    ? "border-[var(--color-dark-gold)] bg-[var(--color-ivory)]"
+                                    : "border-[var(--color-sand)]"
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={(event) =>
+                                    handleOptionChange(
+                                      service.id,
+                                      optionName,
+                                      event.target.checked,
+                                    )
+                                  }
+                                  className={checkboxClass}
+                                />
+
+                                <span>{optionName}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </fieldset>
+                    ))}
+                  </div>
+                )}
 
                 <div>
                   <label htmlFor="project-details" className={labelClass}>
