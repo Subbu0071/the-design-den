@@ -1,25 +1,21 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import usePageTitle from "../utils/usePageTitle";
 import siteConfig from "../config/site";
 import services from "../data/services";
-
 import Button from "../components/ui/Button";
 import Container from "../components/ui/Container";
 import Eyebrow from "../components/ui/Eyebrow";
 import Section from "../components/ui/Section";
 
-const serviceOptions = services.map((service) => ({
-  id: service.id,
-  title: service.title,
-}));
+import { apiRequest } from "../services/api";
+import { Link } from "react-router-dom";
 
+// Shared styles keep form controls consistent with the DESIGN DEN visual system.
 const inputClass =
   "mt-2 min-h-12 w-full border border-[var(--color-warm-grey)] bg-transparent px-4 py-3 text-base text-[var(--color-charcoal)] outline-none transition-colors focus-visible:border-[var(--color-dark-gold)] focus-visible:ring-2 focus-visible:ring-[var(--color-dark-gold)] focus-visible:ring-offset-2";
-
 const labelClass = "block text-sm font-medium text-[var(--color-charcoal)]";
-
 const checkboxClass =
   "mt-1 h-4 w-4 shrink-0 accent-[var(--color-dark-gold)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-dark-gold)]";
 
@@ -40,44 +36,34 @@ function Contact() {
 
   const [searchParams] = useSearchParams();
 
-  // Support both the original single-service URL and the new multi-service URL.
-  const requestedService = searchParams.get("service");
-
+  // Read valid service IDs from the URL so Services-page links can prefill this form.
   const requestedServiceIds = [
     ...new Set(
-      [...searchParams.getAll("services"), requestedService].filter(Boolean),
+      [...searchParams.getAll("services"), searchParams.get("service")].filter(
+        Boolean,
+      ),
     ),
-  ].filter((id) => serviceOptions.some((service) => service.id === id));
+  ].filter((id) => services.some((service) => service.id === id));
 
-  const validRequestedService = serviceOptions.some(
-    (service) => service.id === requestedService,
-  )
-    ? requestedService
-    : "";
-
+  // Only prefill option names that exist in the current service catalogue.
   const readRequestedOptions = () => {
     const result = {};
-
     requestedServiceIds.forEach((serviceId) => {
       const service = services.find((item) => item.id === serviceId);
       if (!service) return;
-
       const validOptions = searchParams
         .getAll(`option[${serviceId}]`)
-        .filter((option) =>
-          service.options.some((item) => item.name === option),
+        .filter((name) =>
+          service.options.some((option) => option.name === name),
         );
-
-      if (validOptions.length > 0) {
-        result[serviceId] = [...new Set(validOptions)];
-      }
+      if (validOptions.length) result[serviceId] = [...new Set(validOptions)];
     });
-
     return result;
   };
 
-  const [selectedServices, setSelectedServices] = useState(() =>
-    requestedServiceIds.length > 0 ? requestedServiceIds : [],
+  // Keep all form values in React state; no form data is sent or stored here.
+  const [selectedServices, setSelectedServices] = useState(
+    () => requestedServiceIds,
   );
   const [selectedOptions, setSelectedOptions] = useState(readRequestedOptions);
   const [name, setName] = useState("");
@@ -90,22 +76,16 @@ function Contact() {
   );
   const [consent, setConsent] = useState(false);
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
-
-  useEffect(() => {
-    if (requestedServiceIds.length === 0) return;
-
-    setSelectedServices(requestedServiceIds);
-    setSelectedOptions(readRequestedOptions());
-    // URL changes should update the prefilled services and options.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  const [submissionMessage, setSubmissionMessage] = useState("");
 
   const hasFullHomeService = selectedServices.includes("full-home-interiors");
-  const hasCommercialService = selectedServices.includes("commercial-interiors");
-
+  const hasCommercialService = selectedServices.includes(
+    "commercial-interiors",
+  );
   const normalizedPhone = phone.replace(/[\s()-]/g, "").replace(/^\+91/, "");
   const isPhoneValid = /^[6-9]\d{9}$/.test(normalizedPhone);
 
+  // Centralized validation keeps the error summary and field messages in sync.
   const errors = {
     name: name.trim() ? "" : "Please tell us your name.",
     phone: isPhoneValid
@@ -116,27 +96,27 @@ function Contact() {
       : "Please tell us your city and area so we know where the project is.",
     services: selectedServices.length
       ? ""
-      : "Please choose at least one option, or select “Not sure yet”.",
+      : "Please choose at least one service, or select “Not sure yet”.",
     consent: consent ? "" : "Please tick this box so we can contact you.",
   };
 
+  const selectedServiceDetails = selectedServices
+    .map((id) => services.find((service) => service.id === id))
+    .filter(Boolean);
+
   function handleServiceChange(serviceId, checked) {
+    // “Not sure yet” is exclusive; other service selections may be combined.
     setSelectedServices((current) => {
-      if (serviceId === "not-sure") {
-        return checked ? ["not-sure"] : [];
-      }
-
-      const withoutNotSure = current.filter((id) => id !== "not-sure");
-
-      if (checked) {
-        return withoutNotSure.includes(serviceId)
-          ? withoutNotSure
-          : [...withoutNotSure, serviceId];
-      }
-
-      return withoutNotSure.filter((id) => id !== serviceId);
+      if (serviceId === "not-sure") return checked ? ["not-sure"] : [];
+      const otherServices = current.filter((id) => id !== "not-sure");
+      if (checked)
+        return otherServices.includes(serviceId)
+          ? otherServices
+          : [...otherServices, serviceId];
+      return otherServices.filter((id) => id !== serviceId);
     });
 
+    // Remove option selections for a service when that service is unchecked.
     if (!checked) {
       setSelectedOptions((current) => {
         const next = { ...current };
@@ -146,48 +126,70 @@ function Contact() {
     }
   }
 
-  function handleOptionChange(serviceId, option, checked) {
+  function handleOptionChange(serviceId, optionName, checked) {
     setSelectedOptions((current) => {
       const currentOptions = current[serviceId] ?? [];
       const nextOptions = checked
-        ? [...new Set([...currentOptions, option])]
-        : currentOptions.filter((item) => item !== option);
-
-      return {
-        ...current,
-        [serviceId]: nextOptions,
-      };
+        ? [...new Set([...currentOptions, optionName])]
+        : currentOptions.filter((item) => item !== optionName);
+      return { ...current, [serviceId]: nextOptions };
     });
   }
 
   function handleOptionalChange(event) {
     const { name: fieldName, value } = event.target;
-
-    setOptionalDetails((current) => ({
-      ...current,
-      [fieldName]: value,
-    }));
+    setOptionalDetails((current) => ({ ...current, [fieldName]: value }));
   }
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    setAttemptedSubmit(true);
+  // Keep online enquiries disabled until the privacy notice is ready.
+  const ONLINE_SUBMISSIONS_ENABLED = false;
 
-    const hasErrors = Object.values(errors).some(Boolean);
+  
+async function handleSubmit(event) {
+  event.preventDefault();
+  setAttemptedSubmit(true);
+  setSubmissionMessage("");
 
-    if (hasErrors) {
-      document.getElementById("consultation-errors")?.focus();
-      return;
-    }
-
-    // This prototype deliberately does not send or store enquiry data.
+  if (Object.values(errors).some(Boolean)) {
+    document.getElementById("consultation-errors")?.focus();
+    return;
   }
+
+  if (!ONLINE_SUBMISSIONS_ENABLED) {
+    setSubmissionMessage(
+      "Online enquiries are not enabled yet. Please call or WhatsApp DESIGN DEN for now.",
+    );
+    return;
+  }
+
+  try {
+    const payload = {
+      name: name.trim(),
+      phone: phone.trim(),
+      city: city.trim(),
+      selectedServices,
+      selectedOptions,
+      projectDetails: projectDetails.trim(),
+      optionalDetails,
+      consent,
+    };
+
+    const result = await apiRequest("/api/contact", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    setSubmissionMessage(result.message);
+  } catch (error) {
+    setSubmissionMessage(
+      error.message ||
+        "We couldn't submit your enquiry. Please try again later.",
+    );
+  }
+}
+
 
   const { brand, contact, locations } = siteConfig;
-
-  const selectedServiceDetails = selectedServices
-    .map((id) => services.find((service) => service.id === id))
-    .filter(Boolean);
 
   return (
     <>
@@ -199,11 +201,9 @@ function Contact() {
                 Start a Conversation
               </span>
             </Eyebrow>
-
             <h1 className="mt-5 text-5xl sm:text-6xl">
               Let&apos;s design a space around how you live.
             </h1>
-
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--color-sand)]">
               Share a few details about your project and help us understand what
               you have in mind.
@@ -217,14 +217,11 @@ function Contact() {
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
             <aside className="order-2 lg:order-1">
               <Eyebrow>Contact</Eyebrow>
-
               <h2 className="mt-4 text-3xl sm:text-4xl">Prefer to talk?</h2>
-
               <p className="mt-4 max-w-xl leading-8 text-[var(--color-warm-grey)]">
                 Not sure which service you need? Start a conversation with
                 DESIGN DEN and explain your requirements in your own words.
               </p>
-
               <div className="mt-8 space-y-6">
                 <div>
                   <p className="section-label text-[var(--color-warm-grey)]">
@@ -237,7 +234,6 @@ function Contact() {
                     {contact.phone}
                   </a>
                 </div>
-
                 <div>
                   <p className="section-label text-[var(--color-warm-grey)]">
                     WhatsApp
@@ -255,7 +251,6 @@ function Contact() {
                     images directly on WhatsApp.
                   </p>
                 </div>
-
                 <div>
                   <p className="section-label text-[var(--color-warm-grey)]">
                     Locations
@@ -266,7 +261,6 @@ function Contact() {
                       : locations.cities.join(" · ")}
                   </p>
                 </div>
-
                 <div>
                   <p className="section-label text-[var(--color-warm-grey)]">
                     Our approach
@@ -280,11 +274,9 @@ function Contact() {
 
             <div className="order-1 border border-[var(--color-sand)] bg-[var(--color-white)] p-5 sm:p-8 lg:order-2 lg:p-10">
               <Eyebrow>Consultation</Eyebrow>
-
               <h2 className="mt-4 text-3xl sm:text-4xl">
                 Tell us about your space.
               </h2>
-
               <p className="mt-4 leading-7 text-[var(--color-warm-grey)]">
                 Only the essential questions are required. You can add more
                 details if you&apos;d like.
@@ -295,7 +287,6 @@ function Contact() {
                   <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-warm-grey)]">
                     Your selection from the Services page
                   </p>
-
                   <div className="mt-3 space-y-3">
                     {selectedServiceDetails.map((service) => (
                       <div key={service.id}>
@@ -321,7 +312,7 @@ function Contact() {
                 {attemptedSubmit && Object.values(errors).some(Boolean) && (
                   <div
                     id="consultation-errors"
-                    tabIndex="-1"
+                    tabIndex={-1}
                     role="alert"
                     className="border border-red-700 bg-red-50 p-4 text-sm text-red-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
                   >
@@ -433,16 +424,11 @@ function Contact() {
                     Choose all that apply. If you&apos;re unsure, choose “Not
                     sure yet”.
                   </p>
-
                   <div className="grid gap-3 sm:grid-cols-2">
-                    {serviceOptions.map((service) => (
+                    {services.map((service) => (
                       <label
                         key={service.id}
-                        className={`flex min-h-12 items-start gap-3 border p-3 text-sm leading-6 transition-colors hover:border-[var(--color-dark-gold)] ${
-                          selectedServices.includes(service.id)
-                            ? "border-[var(--color-dark-gold)] bg-[var(--color-ivory)]"
-                            : "border-[var(--color-sand)]"
-                        }`}
+                        className={`flex min-h-12 items-start gap-3 border p-3 text-sm leading-6 transition-colors hover:border-[var(--color-dark-gold)] ${selectedServices.includes(service.id) ? "border-[var(--color-dark-gold)] bg-[var(--color-ivory)]" : "border-[var(--color-sand)]"}`}
                       >
                         <input
                           type="checkbox"
@@ -460,13 +446,8 @@ function Contact() {
                         <span>{service.title}</span>
                       </label>
                     ))}
-
                     <label
-                      className={`flex min-h-12 items-start gap-3 border p-3 text-sm leading-6 transition-colors hover:border-[var(--color-dark-gold)] ${
-                        selectedServices.includes("not-sure")
-                          ? "border-[var(--color-dark-gold)] bg-[var(--color-ivory)]"
-                          : "border-[var(--color-sand)]"
-                      }`}
+                      className={`flex min-h-12 items-start gap-3 border p-3 text-sm leading-6 transition-colors hover:border-[var(--color-dark-gold)] ${selectedServices.includes("not-sure") ? "border-[var(--color-dark-gold)] bg-[var(--color-ivory)]" : "border-[var(--color-sand)]"}`}
                     >
                       <input
                         type="checkbox"
@@ -481,7 +462,6 @@ function Contact() {
                       <span>Not sure yet</span>
                     </label>
                   </div>
-
                   {attemptedSubmit && errors.services && (
                     <p className="text-sm text-red-800">{errors.services}</p>
                   )}
@@ -499,7 +479,6 @@ function Contact() {
                         consultation.
                       </p>
                     </div>
-
                     {selectedServiceDetails.map((service) => (
                       <fieldset
                         key={service.id}
@@ -508,22 +487,15 @@ function Contact() {
                         <legend className="px-1 text-sm font-semibold text-[var(--color-charcoal)]">
                           {service.title}
                         </legend>
-
                         <div className="mt-2 grid gap-3 sm:grid-cols-2">
                           {service.options.map((option) => {
-                            const optionName = option.name;
                             const isChecked = (
                               selectedOptions[service.id] ?? []
-                            ).includes(optionName);
-
+                            ).includes(option.name);
                             return (
                               <label
-                                key={optionName}
-                                className={`flex items-start gap-3 border p-3 text-sm leading-6 text-[var(--color-charcoal)] transition-colors hover:border-[var(--color-dark-gold)] ${
-                                  isChecked
-                                    ? "border-[var(--color-dark-gold)] bg-[var(--color-ivory)]"
-                                    : "border-[var(--color-sand)]"
-                                }`}
+                                key={option.name}
+                                className={`flex items-start gap-3 border p-3 text-sm leading-6 text-[var(--color-charcoal)] transition-colors hover:border-[var(--color-dark-gold)] ${isChecked ? "border-[var(--color-dark-gold)] bg-[var(--color-ivory)]" : "border-[var(--color-sand)]"}`}
                               >
                                 <input
                                   type="checkbox"
@@ -531,14 +503,13 @@ function Contact() {
                                   onChange={(event) =>
                                     handleOptionChange(
                                       service.id,
-                                      optionName,
+                                      option.name,
                                       event.target.checked,
                                     )
                                   }
                                   className={checkboxClass}
                                 />
-
-                                <span>{optionName}</span>
+                                <span>{option.name}</span>
                               </label>
                             );
                           })}
@@ -578,7 +549,6 @@ function Contact() {
                     <span>Add more details (optional)</span>
                     <span aria-hidden="true">{optionalOpen ? "−" : "+"}</span>
                   </button>
-
                   {optionalOpen && (
                     <div
                       id="optional-project-details"
@@ -600,7 +570,6 @@ function Contact() {
                           <option value="either">Either is fine</option>
                         </select>
                       </div>
-
                       {hasFullHomeService && (
                         <div>
                           <label htmlFor="home-size" className={labelClass}>
@@ -622,7 +591,6 @@ function Contact() {
                           </select>
                         </div>
                       )}
-
                       {hasCommercialService && (
                         <div>
                           <label
@@ -646,7 +614,6 @@ function Contact() {
                           </select>
                         </div>
                       )}
-
                       <div>
                         <label htmlFor="project-stage" className={labelClass}>
                           Where is your project right now?
@@ -670,7 +637,6 @@ function Contact() {
                           <option value="not-sure">Not sure</option>
                         </select>
                       </div>
-
                       <div>
                         <label htmlFor="start-timing" className={labelClass}>
                           When would you like to start?
@@ -689,7 +655,6 @@ function Contact() {
                           <option value="exploring">Just exploring</option>
                         </select>
                       </div>
-
                       <div>
                         <label htmlFor="budget" className={labelClass}>
                           Do you have a budget in mind?
@@ -726,16 +691,18 @@ function Contact() {
                       onChange={(event) => setConsent(event.target.checked)}
                       className={checkboxClass}
                     />
+
                     <span>
                       I agree that DESIGN DEN may contact me by phone or
                       WhatsApp about this enquiry.{" "}
-                      <span className="text-[var(--color-warm-grey)]">
-                        A privacy notice will be added before online submissions
-                        are enabled.
-                      </span>
+                      <Link
+                        to="/privacy"
+                        className="font-medium underline underline-offset-4 hover:text-[var(--color-dark-gold)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-dark-gold)]"
+                      >
+                        Read our Privacy Notice
+                      </Link>
                     </span>
                   </label>
-
                   {attemptedSubmit && errors.consent && (
                     <p className="text-sm text-red-800">{errors.consent}</p>
                   )}
@@ -745,6 +712,15 @@ function Contact() {
                   <p className="text-sm font-semibold text-[var(--color-charcoal)]">
                     Online enquiries are not connected yet.
                   </p>
+                  {submissionMessage && (
+                    <p
+                      role="status"
+                      aria-live="polite"
+                      className="mt-2 text-sm leading-6 text-[var(--color-warm-grey)]"
+                    >
+                      {submissionMessage}
+                    </p>
+                  )}
                   <p className="mt-2 text-sm leading-6 text-[var(--color-warm-grey)]">
                     This form is a preview and will not send or save your
                     details. Please call or WhatsApp DESIGN DEN using the

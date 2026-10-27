@@ -6,6 +6,8 @@ import rateLimit from "express-rate-limit";
 import mongoose from "mongoose";
 import dns from "node:dns";
 
+import contactRouter from "./routes/contact.js";
+
 dotenv.config();
 
 // Temporary DNS workaround.
@@ -49,8 +51,20 @@ app.get("/api/health", (_req, res) => {
     database: databaseConnected ? "connected" : "disconnected",
   });
 });
+//  Register API routes
+const contactSubmissionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many enquiry attempts. Please try again in 15 minutes.",
+  },
+});
 
-// Not-found response for unknown API routes
+app.use("/api/contact", contactSubmissionLimiter, contactRouter);
+//  Handle unknown API routes
 app.use("/api", (_req, res) => {
   res.status(404).json({
     success: false,

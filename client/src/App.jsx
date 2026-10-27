@@ -10,6 +10,7 @@ import About from "./pages/About";
 import Process from "./pages/Process";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
+import Privacy from "./pages/Privacy";
 
 import ScrollToTop from "./utils/ScrollToTop";
 
@@ -20,6 +21,7 @@ function App() {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/privacy" element={<Privacy />} />
           <Route path="/projects/:projectId" element={<ProjectDetail />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/services" element={<Services />} />

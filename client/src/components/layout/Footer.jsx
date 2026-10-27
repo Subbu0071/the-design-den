@@ -110,6 +110,12 @@ function Footer() {
             >
               Contact
             </Link>
+            <Link
+              to="/privacy"
+              className="transition-colors duration-200 hover:text-[var(--color-ivory)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ivory)]"
+            >
+              Privacy
+            </Link>
           </div>
         </div>
       </div>
