@@ -74,10 +74,13 @@ function Privacy() {
             <section>
               <h2 className="text-2xl">4. How long we retain information</h2>
               <p className="mt-3 leading-8">
-                The proposed retention period is 12 months from the enquiry
-                date. Information may need to be retained longer for an ongoing
-                project, legal obligations, legitimate business records, or
-                dispute resolution.
+                DESIGN DEN has not yet finalised its retention period for
+                consultation enquiries. Information should be retained only for
+                as long as necessary for the purposes for which it was
+                collected, subject to applicable legal requirements and
+                legitimate business record-keeping needs. The retention period
+                and deletion process will be confirmed before online enquiries
+                are enabled.
               </p>
               <p className="mt-3 leading-8">
                 <strong>Pending confirmation:</strong> DESIGN DEN must confirm

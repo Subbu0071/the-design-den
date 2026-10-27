@@ -35,5 +35,3 @@ export const serviceCatalogue = {
 };
 
 export const allowedServiceIds = Object.keys(serviceCatalogue);
-
-export const allowedServiceIds = Object.keys(serviceCatalogue);

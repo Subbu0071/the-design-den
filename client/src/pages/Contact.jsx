@@ -77,6 +77,7 @@ function Contact() {
   const [consent, setConsent] = useState(false);
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const [submissionMessage, setSubmissionMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const hasFullHomeService = selectedServices.includes("full-home-interiors");
   const hasCommercialService = selectedServices.includes(
@@ -147,6 +148,9 @@ function Contact() {
   
 async function handleSubmit(event) {
   event.preventDefault();
+
+  if (isSubmitting) return;
+
   setAttemptedSubmit(true);
   setSubmissionMessage("");
 
@@ -161,6 +165,7 @@ async function handleSubmit(event) {
     );
     return;
   }
+  setIsSubmitting(true);
 
   try {
     const payload = {
@@ -185,6 +190,8 @@ async function handleSubmit(event) {
       error.message ||
         "We couldn't submit your enquiry. Please try again later.",
     );
+  } finally {
+    setIsSubmitting(false);
   }
 }
 
@@ -328,7 +335,6 @@ async function handleSubmit(event) {
                     </ul>
                   </div>
                 )}
-
                 <div>
                   <label htmlFor="name" className={labelClass}>
                     Your name <span aria-hidden="true">*</span>
@@ -355,7 +361,6 @@ async function handleSubmit(event) {
                     </p>
                   )}
                 </div>
-
                 <div>
                   <label htmlFor="phone" className={labelClass}>
                     Mobile number <span aria-hidden="true">*</span>
@@ -386,7 +391,6 @@ async function handleSubmit(event) {
                     <p className="mt-2 text-sm text-red-800">{errors.phone}</p>
                   )}
                 </div>
-
                 <div>
                   <label htmlFor="city" className={labelClass}>
                     City and area <span aria-hidden="true">*</span>
@@ -408,7 +412,6 @@ async function handleSubmit(event) {
                     <p className="mt-2 text-sm text-red-800">{errors.city}</p>
                   )}
                 </div>
-
                 <fieldset
                   className="space-y-3"
                   aria-describedby="services-help"
@@ -466,7 +469,6 @@ async function handleSubmit(event) {
                     <p className="text-sm text-red-800">{errors.services}</p>
                   )}
                 </fieldset>
-
                 {selectedServiceDetails.length > 0 && (
                   <div className="space-y-5">
                     <div>
@@ -518,7 +520,6 @@ async function handleSubmit(event) {
                     ))}
                   </div>
                 )}
-
                 <div>
                   <label htmlFor="project-details" className={labelClass}>
                     Anything else we should know?{" "}
@@ -537,7 +538,6 @@ async function handleSubmit(event) {
                     placeholder="Tell us about the space, your ideas, or anything important to you."
                   />
                 </div>
-
                 <div className="border-y border-[var(--color-sand)] py-4">
                   <button
                     type="button"
@@ -680,7 +680,6 @@ async function handleSubmit(event) {
                     </div>
                   )}
                 </div>
-
                 <div className="space-y-3">
                   <label className="flex items-start gap-3 text-sm leading-6 text-[var(--color-charcoal)]">
                     <input
@@ -707,7 +706,6 @@ async function handleSubmit(event) {
                     <p className="text-sm text-red-800">{errors.consent}</p>
                   )}
                 </div>
-
                 <div className="border border-[var(--color-sand)] bg-[var(--color-ivory)] p-4">
                   <p className="text-sm font-semibold text-[var(--color-charcoal)]">
                     Online enquiries are not connected yet.
@@ -727,10 +725,13 @@ async function handleSubmit(event) {
                     contact options on this page for now.
                   </p>
                 </div>
-
-                <Button type="submit" variant="primary">
-                  Check required fields
-                </Button>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={isSubmitting || !ONLINE_SUBMISSIONS_ENABLED}
+                >
+                  {isSubmitting ? "Submitting..." : "Check required fields"}
+                </Button>             
               </form>
             </div>
           </div>
